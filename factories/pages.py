@@ -26,14 +26,14 @@ class PageFactory:
         self.auth_helper.auth_with_cookie(user)
 
     @property
-    def login(self):
+    def login(self) -> LoginPage:
         """Get or create LoginPage instance."""
         if 'login' not in self._pages_cache:
             self._pages_cache['login'] = LoginPage(self._page, self._env)
         return self._pages_cache['login']
 
     @property
-    def inventory(self):
+    def inventory(self) -> InventoryPage:
         """Get or create InventoryPage instance."""
         if 'inventory' not in self._pages_cache:
             self._pages_cache['inventory'] = InventoryPage(self._page, self._env)
