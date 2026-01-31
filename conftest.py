@@ -9,6 +9,12 @@ def pytest_addoption(parser):
         "--env", action="store", default=None, help="Environment [qa, ci, dev, production, www]")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def configure_playwright(playwright):
+    # Sauce demo website uses data-test and not data-testid
+    playwright.selectors.set_test_id_attribute("data-test")
+
+
 @pytest.fixture(scope="session")
 def env(request):
     """Get environment from CLI - REQUIRED."""

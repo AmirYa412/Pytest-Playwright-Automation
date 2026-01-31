@@ -27,21 +27,12 @@ class LoginPage(BasePage):
         try:
             user_credentials = self._env.users[user]
         except KeyError:
-            raise KeyError(
-                f"User '{user}' not found. "
-                f"Available: {list(self._env.users.keys())}"
-            )
-
-        # Navigate to login page
-        self.navigate()
+            raise KeyError(f"User '{user}' not found. "f"Available: {list(self._env.users.keys())}")
 
         # Use locator attributes directly
         self.username_input.fill(user_credentials["username"])
         self.password_input.fill(user_credentials["password"])
         self.login_button.click()
-
-        # Wait for redirect to inventory
-        self._page.wait_for_url("**/inventory.html", timeout=self.timeout)
 
     def is_err_msg_displayed(self) -> bool:
         """Check if error message is displayed."""
