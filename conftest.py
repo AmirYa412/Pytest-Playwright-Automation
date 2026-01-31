@@ -25,12 +25,13 @@ def env(request):
 
 
 @pytest.fixture(scope="session")
-def browser_context_args(env):
+def browser_context_args(browser_context_args, env):
     """
     Override pytest-playwright's browser_context_args.
     This applies our viewport and other context settings if needed.
     """
     return {
+        **browser_context_args,
         "viewport": env.viewport,
         "ignore_https_errors": True,
     }
@@ -43,7 +44,7 @@ def auth_state_cache():
 
 
 @pytest.fixture
-def pages(page, env, auth_state_cache) -> PageFactory:
+def pages(page, env, auth_state_cache):
     """
     Main fixture - tests only need this.
     Uses pytest-playwright's page fixture under the hood.
@@ -52,7 +53,7 @@ def pages(page, env, auth_state_cache) -> PageFactory:
 
 
 @pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_makereport(item, call):
+def pytest_runtest_makereport(item):
     pytest_html = item.config.pluginmanager.getplugin('html')
     outcome = yield
     report = outcome.get_result()
