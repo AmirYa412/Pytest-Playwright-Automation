@@ -1,5 +1,6 @@
 from pages.base_page import BasePage
-
+from components.header import Header
+from components.sidebar_menu import SidebarMenu
 
 class InventoryPage(BasePage):
     """SauceDemo inventory/home page."""
@@ -16,9 +17,8 @@ class InventoryPage(BasePage):
         self.inventory_item_prices = page.get_by_test_id("inventory-item-price")
         self.sort_dropdown = page.get_by_test_id("product_sort_container")
 
-        # Components (to be added later)
-        # self.header = Header(page)
-        # self.sidebar = SidebarMenu(page)
+        self.header = Header(page)
+        self.sidebar = SidebarMenu(page)
 
     def are_items_titles_displayed(self) -> bool:
         """Check if inventory item titles are displayed."""

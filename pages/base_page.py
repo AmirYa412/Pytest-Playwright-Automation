@@ -30,9 +30,7 @@ class BasePage:
     def verify_page_title(self):
         """Verify page title matches TITLE attribute (if set)."""
         if self.TITLE and hasattr(self, 'header'):
-            actual_title = self.header.get_page_title()
-            assert actual_title == self.TITLE, \
-                f"Expected page title '{self.TITLE}', but got '{actual_title}'"
+            expect(self.header.page_title).to_have_text(self.TITLE)
 
     def get_current_page_title(self) -> str:
         """Get current page title."""
