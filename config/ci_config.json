@@ -1,0 +1,8 @@
+{
+  "timeout": 50000,
+  "screenshots_on_failure": true,
+    "viewport": {
+    "width": 1920,
+    "height": 1080
+  }
+}
