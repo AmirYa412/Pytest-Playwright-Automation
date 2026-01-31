@@ -1,7 +1,7 @@
 import pytest
 from factories.pages import PageFactory
 from support.environment import Environment
-
+import base64
 
 def pytest_addoption(parser):
     """Add custom CLI options (only --env, pytest-playwright handles browser)."""
@@ -49,3 +49,25 @@ def pages(page, env, auth_state_cache) -> PageFactory:
     Uses pytest-playwright's page fixture under the hood.
     """
     return PageFactory(page, env, auth_state_cache)
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    pytest_html = item.config.pluginmanager.getplugin('html')
+    outcome = yield
+    report = outcome.get_result()
+    extra = getattr(report, 'extra', [])
+
+    if report.when == 'call':
+        page = item.funcargs.get("page")
+        if report.failed and page:
+            # 1. Get screenshot as bytes
+            screenshot_bytes = page.screenshot()
+
+            # 2. Convert bytes to base64 string
+            screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
+
+            # 3. Append using the built-in image helper (No raw HTML!)
+            extra.append(pytest_html.extras.image(screenshot_base64))
+
+    report.extra = extra

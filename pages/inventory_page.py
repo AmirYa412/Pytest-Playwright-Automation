@@ -2,6 +2,7 @@ from pages.base_page import BasePage
 from components.header import Header
 from components.sidebar_menu import SidebarMenu
 
+
 class InventoryPage(BasePage):
     """SauceDemo inventory/home page."""
 
