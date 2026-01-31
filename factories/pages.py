@@ -1,7 +1,8 @@
 from playwright.sync_api import Page
 from support.environment import Environment
 from utilities.auth_helper import AuthHelper
-from pages.login.login_page import LoginPage
+from pages.login_page import LoginPage
+from pages.inventory_page import InventoryPage
 
 
 class PageFactory:
@@ -31,10 +32,9 @@ class PageFactory:
             self._pages_cache['login'] = LoginPage(self._page, self._env)
         return self._pages_cache['login']
 
-    # TODO: Add other page objects
-    # @property
-    # def inventory(self):
-    #     if 'inventory' not in self._pages_cache:
-    #         from pages.inventory.inventory_page import InventoryPage
-    #         self._pages_cache['inventory'] = InventoryPage(self._page, self._env)
-    #     return self._pages_cache['inventory']
+    @property
+    def inventory(self):
+        """Get or create InventoryPage instance."""
+        if 'inventory' not in self._pages_cache:
+            self._pages_cache['inventory'] = InventoryPage(self._page, self._env)
+        return self._pages_cache['inventory']
