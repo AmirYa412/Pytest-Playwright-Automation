@@ -6,11 +6,7 @@ from support.environment import Environment
 def pytest_addoption(parser):
     """Add custom CLI options (only --env, pytest-playwright handles browser)."""
     parser.addoption(
-        "--env",
-        action="store",
-        default=None,
-        help="Environment (qa, ci, dev, production, www)"
-    )
+        "--env", action="store", default=None, help="Environment [qa, ci, dev, production, www]")
 
 
 @pytest.fixture(scope="session")
@@ -18,7 +14,7 @@ def env(request):
     """Get environment from CLI - REQUIRED."""
     env_prefix = request.config.getoption("--env")
     if not env_prefix:
-        pytest.fail("--env is required. Use: --env=qa|ci|dev|production|www")
+        raise EnvironmentError("--env is required. Supports: --env=qa|ci|dev|production|www")
     return Environment(env_prefix)
 
 
@@ -26,7 +22,7 @@ def env(request):
 def browser_context_args(env):
     """
     Override pytest-playwright's browser_context_args.
-    This applies our viewport and other context settings.
+    This applies our viewport and other context settings if needed.
     """
     return {
         "viewport": env.viewport,
