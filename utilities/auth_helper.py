@@ -12,12 +12,7 @@ class AuthHelper:
         self._cookies_cache = cookies_cache
 
     def auth_with_cookie(self, user_key: str):
-        """
-        Inject authentication cookie for specified user to bypass UI login.
-
-        Args:
-            user_key: User key from environment.users (e.g., "standard_user")
-        """
+        """Inject authentication cookie for specified user to bypass UI login."""
         try:
             user_data = self._env.users[user_key]
         except KeyError:
@@ -35,12 +30,14 @@ class AuthHelper:
             context = self._page.context
             context.add_cookies(self._cookies_cache[user_key])
         else:
+            from urllib.parse import urlparse
+            current_domain = urlparse(self._page.url).netloc
             # Create new authentication cookie and cache it
             print(f"Creating authentication cookie for {user_key}")
             cookie = {
                 'name': 'session-username',
                 'value': user_data['username'],
-                'url': self._env.base_url,
+                'domain': self._env.domain,
                 'path': '/',
                 'expires': int((datetime.now() + timedelta(days=1)).timestamp())
             }

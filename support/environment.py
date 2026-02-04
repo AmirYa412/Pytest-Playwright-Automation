@@ -16,7 +16,7 @@ class Environment:
     def __init__(self, env_prefix: str, domain: str = "saucedemo.com"):
         self.prefix = env_prefix.lower()
         self.protocol = "https://"
-        self.domain = domain
+        self.domain = f"{env_prefix}.{domain}"
         self.is_ci = self._is_ci_environment()
         self._config = self._load_config()
         self.base_url = self.set_base_url()
@@ -49,9 +49,7 @@ class Environment:
 
     def set_base_url(self) -> str:
         """Build base URL dynamically based on env_prefix."""
-        if self.prefix in ("production", "www"):
-            return f"{self.protocol}{self.domain}"
-        return f"{self.protocol}{self.prefix}.{self.domain}"
+        return f"{self.protocol}{self.domain}"
 
     @property
     def timeout(self) -> int:
