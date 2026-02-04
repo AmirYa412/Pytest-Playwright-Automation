@@ -2,8 +2,10 @@ from playwright.sync_api import expect
 
 
 class TestLoginPage:
+    """Test login page functionality."""
 
     def test_login_and_logout(self, pages):
+        """Verify user is able to login and logout via UI"""
         pages.login.navigate()
         pages.login.perform_login(user="standard_user")
 
@@ -19,5 +21,4 @@ class TestLoginPage:
     def test_login_error_message_for_locked_user(self, pages):
         pages.login.navigate()
         pages.login.perform_login(user="locked_out_user")
-        expect(pages.login.error_message).to_have_text("Epic sadfa1ce: Sorry, this user has been locked out.")
-
+        expect(pages.login.error_message).to_have_text("Epic sadface: Sorry, this user has been locked out.")
