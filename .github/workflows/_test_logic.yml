@@ -50,3 +50,24 @@ jobs:
         with:
           name: reports-${{ inputs.browser }}-${{ github.run_number }}
           path: reports/
+
+      - name: Upload to GitHub Pages
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: reports/
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: actions/deploy-pages@v4
+
+      - name: Add report link to summary
+        if: always()
+        run: |
+          REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)
+          echo "## 📊 Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "[Open Report](https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO_NAME}/report.html)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check test status
+        if: steps.run-tests.outcome == 'failure'
+        run: exit 1
