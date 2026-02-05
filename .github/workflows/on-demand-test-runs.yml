@@ -8,6 +8,14 @@ on:
         default: 'www'
         type: choice
         options: [www, qa, ci, dev]
+
+      browser:
+        description: 'Test marker'
+        required: true
+        default: 'chromium'
+        type: choice
+        options: [ chromium, firefox, webkit ]
+
       marker:
         description: 'Test marker'
         required: true
@@ -15,11 +23,21 @@ on:
         type: choice
         options: [regression, login, inventory]
 
+      workers:
+        description: 'Parallel execution workers amount'
+        required: true
+        default: '1'
+        type: choice
+        options: ["1", "2", "4"]
+
+
+
 jobs:
   call-tests:
     uses: ./.github/workflows/_test_logic.yml
     with:
       env: ${{ inputs.env }}
-      browser: chromium
+      browser: ${{ inputs.browser }}
       marker: ${{ inputs.marker }}
+      workers: ${{ inputs.workers}}
     secrets: inherit
