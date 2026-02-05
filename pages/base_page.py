@@ -12,7 +12,6 @@ class BasePage:
     def __init__(self, page: Page, env: Environment):
         self._page = page
         self._env = env
-        self.timeout = self._env.timeout
 
     def navigate(self, path: str = None, verify_on_page: bool = True):
         """Navigate to page with optional validation."""
