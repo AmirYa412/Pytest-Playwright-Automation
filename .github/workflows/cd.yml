@@ -1,0 +1,66 @@
+name: 🔄 Regression Tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  pages: write
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          echo "CI_SAUCEDEMO_USER_PASSWORD=${{ secrets.CI_SAUCEDEMO_USER_PASSWORD }}" > .env
+          echo "PROD_SAUCEDEMO_USER_PASSWORD=${{ secrets.PROD_SAUCEDEMO_USER_PASSWORD }}" >> .env
+
+      - name: Build Docker image
+        run: docker build -t pytest-playwright-automation:latest .
+
+      - name: Run regression tests
+        run: |
+          docker run --rm \
+            --env-file .env \
+            -v ${{ github.workspace }}/reports:/app/reports \
+            pytest-playwright-automation:latest \
+            pytest tests/ \
+              --env=www \
+              --browser=chromium \
+              -m regression \
+              -n 2 \
+              -v
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-results-${{ github.run_number }}
+          path: reports/
+          retention-days: 30
+
+      - name: Upload to GitHub Pages
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: reports/
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: actions/deploy-pages@v4
+
+      - name: Add report link
+        if: always()
+        run: |
+          REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)
+          echo "## 📊 Regression Report" >> $GITHUB_STEP_SUMMARY
+          echo "[View Report](https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO_NAME}/report.html)" >> $GITHUB_STEP_SUMMARY

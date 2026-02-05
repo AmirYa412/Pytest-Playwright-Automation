@@ -23,6 +23,7 @@ class InventoryPage(BasePage):
         self.item_price = page.get_by_test_id("inventory-item-price")
         self.item_img = page.locator("img.inventory_item_img")
         self.add_to_cart_btn = page.locator("button[id^='add-to-cart']")
+        self.remove_btn = page.get_by_role("button", name="Remove")  # Add this line
 
         self.sort_dropdown = page.get_by_test_id("product_sort_container")
         self.header = Header(page)
