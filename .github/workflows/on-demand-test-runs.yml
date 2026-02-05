@@ -31,7 +31,6 @@ on:
         options: ["1", "2", "4"]
 
 
-
 jobs:
   call-tests:
     uses: ./.github/workflows/_test_logic.yml

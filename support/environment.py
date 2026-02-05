@@ -38,10 +38,3 @@ class Environment:
         """Build base URL dynamically based on env_prefix."""
         return f"{self.protocol}{self.domain}"
 
-    @property
-    def screenshots_on_failure(self) -> bool:
-        """Check if screenshots on failure are enabled."""
-        return self._config.get("screenshots_on_failure", True)
-
-
-
