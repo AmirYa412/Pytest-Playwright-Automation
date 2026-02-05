@@ -1,17 +1,17 @@
-from pathlib import Path
+import re
 import json
 import pytest
+import base64
+from pathlib import Path
 from factories.pages import PageFactory
 from support.environment import Environment
-import base64
 
 
 PROJECT_ROOT = Path(__file__).parent.resolve()
 
 def pytest_addoption(parser):
     """Add custom CLI options (only --env, pytest-playwright handles browser)."""
-    parser.addoption(
-        "--env", action="store", default=None, help="Environment [qa, ci, dev, production, www]")
+    parser.addoption("--env", action="store", default=None, help="Environment [qa, ci, dev, production, www]")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -49,6 +49,18 @@ def browser_type_launch_args(browser_type_launch_args):
 
 
 @pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):
+    """
+    Override viewport and other context-level settings globally.
+    This is cleaner than a JSON config because it applies natively.
+    """
+    return {
+        **browser_context_args,
+        "viewport": {"width": 1920, "height": 1080},
+    }
+
+
+@pytest.fixture(scope="session")
 def auth_state_cache():
     """Session-scoped auth state cache."""
     return {}
@@ -61,6 +73,7 @@ def pages(page, env, auth_state_cache):
     Uses pytest-playwright's page fixture under the hood.
     """
     return PageFactory(page, env, auth_state_cache)
+
 
 @pytest.fixture(scope="session")
 def data(env):
@@ -82,13 +95,18 @@ def pytest_runtest_makereport(item):
     if report.when == 'call':
         page = item.funcargs.get("page")
         if report.failed and page:
-            # 1. Get screenshot as bytes
             screenshot_bytes = page.screenshot()
-
-            # 2. Convert bytes to base64 string
             screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
-
-            # 3. Append using the built-in image helper (No raw HTML!)
             extra.append(pytest_html.extras.image(screenshot_base64))
+            slug = re.sub(r'[^a-zA-Z0-9]', '-', item.nodeid)
+            test_slug = re.sub(r'-+', '-', slug).lower().strip('-')
+
+            # 2. Define the path relative to report.html
+            # Structure: reports/report.html -> reports/test-results/test-slug/video.webm
+            video_rel_path = f"test-results/{test_slug}/video.webm"
+
+            # 3. Add as a simple clickable link
+            # 'extra.url' creates a standard link in the 'Extra' column
+            extra.append(pytest_html.extras.url(video_rel_path, name="🔴 Video Recording"))
 
     report.extra = extra
