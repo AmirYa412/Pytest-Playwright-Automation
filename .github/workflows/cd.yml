@@ -19,11 +19,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env file
-        run: |
-          echo "CI_SAUCEDEMO_USER_PASSWORD=${{ secrets.CI_SAUCEDEMO_USER_PASSWORD }}" > .env
-          echo "PROD_SAUCEDEMO_USER_PASSWORD=${{ secrets.PROD_SAUCEDEMO_USER_PASSWORD }}" >> .env
-
       - name: Build Docker image
         run: docker build -t pytest-playwright-automation:latest .
 
