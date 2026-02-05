@@ -16,7 +16,7 @@ on:
       workers:
         required: false
         type: string
-        default: "2"
+        default: "1"
     secrets:
       CI_SAUCEDEMO_USER_PASSWORD:
         required: true

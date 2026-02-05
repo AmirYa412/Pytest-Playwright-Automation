@@ -11,9 +11,9 @@ on:
       marker:
         description: 'Test marker'
         required: true
-        default: 'smoke'
+        default: 'regression'
         type: choice
-        options: [smoke, regression, login]
+        options: [regression, login, inventory]
 
 jobs:
   call-tests:
