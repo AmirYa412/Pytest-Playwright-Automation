@@ -1,0 +1,25 @@
+name: 🧪 On-Demand Test Run
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: 'Environment'
+        required: true
+        default: 'www'
+        type: choice
+        options: [www, qa, ci, dev]
+      marker:
+        description: 'Test marker'
+        required: true
+        default: 'smoke'
+        type: choice
+        options: [smoke, regression, login]
+
+jobs:
+  call-tests:
+    uses: ./.github/workflows/_test_logic.yml
+    with:
+      env: ${{ inputs.env }}
+      browser: chromium
+      marker: ${{ inputs.marker }}
+    secrets: inherit

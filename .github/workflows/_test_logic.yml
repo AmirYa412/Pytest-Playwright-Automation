@@ -1,0 +1,52 @@
+name: 🛠️ Shared Test Logic
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+      browser:
+        required: true
+        type: string
+      marker:
+        required: true
+        type: string
+      workers:
+        required: false
+        type: string
+        default: "2"
+    secrets:
+      CI_SAUCEDEMO_USER_PASSWORD:
+        required: true
+      PROD_SAUCEDEMO_USER_PASSWORD:
+        required: true
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Docker image with cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: pytest-automation:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Execute Pytest
+        run: |
+          docker run --rm \
+            -e CI_SAUCEDEMO_USER_PASSWORD=${{ secrets.CI_SAUCEDEMO_USER_PASSWORD }} \
+            -e PROD_SAUCEDEMO_USER_PASSWORD=${{ secrets.PROD_SAUCEDEMO_USER_PASSWORD }} \
+            -v ${{ github.workspace }}/reports:/app/reports \
+            pytest-automation:latest \
+            pytest tests/ --env=${{ inputs.env }} --browser=${{ inputs.browser }} -m ${{ inputs.marker }} -n ${{ inputs.workers }}
+      - name: Upload Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ inputs.browser }}-${{ github.run_number }}
+          path: reports/
