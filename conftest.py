@@ -4,6 +4,7 @@ import pytest
 import base64
 from pathlib import Path
 from factories.pages import PageFactory
+from logger import LoggerFactory
 from support.environment import Environment
 
 
@@ -83,6 +84,21 @@ def data(env):
     file_path = Path(PROJECT_ROOT) / "hardcoded_data" / hardcoded_filename
     with open(file_path, 'r') as f:
         return json.load(f)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def logger():
+    """Session-scoped logger."""
+    return LoggerFactory(project="gui")
+
+
+@pytest.fixture(scope="function", autouse=True)
+def log_test_execution(request, logger):
+    """Log test start and end automatically."""
+    test_name = request.node.name
+    logger.info(f"*** TEST {test_name} STARTING")
+    yield  # Test runs here
+    logger.info(f"*** TEST {test_name} ENDED")
 
 
 @pytest.hookimpl(hookwrapper=True)
