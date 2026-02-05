@@ -62,15 +62,15 @@ jobs:
       - name: Run tests
         run: |
           docker run --rm \
-            --env-file .env \
+            -e CI_SAUCEDEMO_USER_PASSWORD=${{ secrets.CI_SAUCEDEMO_USER_PASSWORD }} \
+            -e PROD_SAUCEDEMO_USER_PASSWORD=${{ secrets.PROD_SAUCEDEMO_USER_PASSWORD }} \
             -v ${{ github.workspace }}/reports:/app/reports \
             pytest-playwright-automation:latest \
             pytest tests/ \
               --env=${{ inputs.env }} \
               --browser=${{ inputs.browser }} \
               -m ${{ inputs.marker }} \
-              -n ${{ inputs.workers }} \
-              -v
+              -n ${{ inputs.workers }}
 
       - name: Upload test artifacts
         if: always()
