@@ -1,9 +1,12 @@
+import pytest
 from playwright.sync_api import expect
 
 
+@pytest.mark.login
 class TestLoginPage:
     """Test login page functionality."""
 
+    @pytest.mark.regression
     def test_login_and_logout(self, pages):
         """Verify user is able to login and logout via UI"""
         pages.login.navigate()
