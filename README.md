@@ -105,8 +105,6 @@ CI_SAUCEDEMO_USER_PASSWORD=secret_sauce
 PROD_SAUCEDEMO_USER_PASSWORD=secret_sauce
 ```
 
-> **⚠️ Security Note:** The `.env` file is included in this repository **for demonstration purposes only**. In production environments, **never commit `.env` files** to version control. Use secure secret management solutions (GitHub Secrets, AWS Secrets Manager, etc.).
-
 ---
 
 ## 🎯 Running Tests
