@@ -273,7 +273,7 @@ Test reports are automatically generated using `pytest-html` with the following 
 - Clickable "🔴 Video Recording" link in test results
 
 **Traces:**
-- Only appear if the run was launched with `--tracing=on` or `--tracing=retain-on-failure` (this is a plain pytest-playwright flag — nothing extra to configure), and only for tests that actually failed
+- Captured by default via `--tracing=retain-on-failure` in `pytest.ini` (a plain pytest-playwright flag), same as video — only for tests that actually failed
 - A failed test with a trace gets an expandable "🔍 Trace Summary" in the report: the failed Playwright action (if any) and its error, a compact action timeline, any console errors, and any failed (4xx/5xx) network requests
 - The raw `trace.zip` is still saved to `reports/test-results/{test-name}/trace.zip` (not linked from the report) for a full timeline/DOM-snapshot/network deep-dive — open it with `playwright show-trace path/to/trace.zip`, or drag it into https://trace.playwright.dev (processes the file locally in your browser; it's not uploaded anywhere, worth knowing since traces can contain cookies/tokens from captured requests)
 
