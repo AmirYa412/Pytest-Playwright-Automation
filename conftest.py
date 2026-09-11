@@ -1,11 +1,11 @@
-import re
+import os
 import json
 import pytest
-import base64
 from pathlib import Path
 from factories.pages import PageFactory
 from logger import LoggerFactory
 from support.environment import Environment
+from support.trace_report import build_trace_summary_html
 
 
 PROJECT_ROOT = Path(__file__).parent.resolve()
@@ -106,23 +106,43 @@ def pytest_runtest_makereport(item):
     pytest_html = item.config.pluginmanager.getplugin('html')
     outcome = yield
     report = outcome.get_result()
-    extra = getattr(report, 'extra', [])
+    extra = getattr(report, 'extras', [])
+    # .absolute() (not .resolve()) to match how pytest-playwright's own output_path
+    # fixture normalizes --output - keeps both paths comparable if either lives under a
+    # symlink (e.g. macOS /tmp -> /private/tmp).
+    report_dir = Path(item.config.getoption("--html")).absolute().parent
 
     if report.when == 'call':
         page = item.funcargs.get("page")
-        if report.failed and page:
-            screenshot_bytes = page.screenshot()
-            screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
-            extra.append(pytest_html.extras.image(screenshot_base64))
-            slug = re.sub(r'[^a-zA-Z0-9]', '-', item.nodeid)
-            test_slug = re.sub(r'-+', '-', slug).lower().strip('-')
+        output_path = item.funcargs.get("output_path")
+        if report.failed and page and output_path:
+            test_results_dir = Path(output_path)
+            screenshot_path = test_results_dir / "screenshot.png"
+            page.screenshot(path=str(screenshot_path))  # creates test_results_dir if needed
+            rel_dir = os.path.relpath(test_results_dir, report_dir)
+            # File path, not base64: keeps pytest-html's normal image viewer/styling and
+            # avoids window.open(data:...), which browsers block as a top-level navigation.
+            extra.append(pytest_html.extras.image(f"{rel_dir}/screenshot.png"))
 
-            # 2. Define the path relative to report.html
-            # Structure: reports/report.html -> reports/test-results/test-slug/video.webm
-            video_rel_path = f"test-results/{test_slug}/video.webm"
+    if report.when == 'teardown':
+        # video/trace are only written to disk during fixture teardown; output_path is
+        # pytest-playwright's own fixture for that artifact directory.
+        output_path = item.funcargs.get("output_path")
+        if output_path:
+            test_results_dir = Path(output_path)
+            rel_dir = os.path.relpath(test_results_dir, report_dir)
 
-            # 3. Add as a simple clickable link
-            # 'extra.url' creates a standard link in the 'Extra' column
-            extra.append(pytest_html.extras.url(video_rel_path, name="🔴 Video Recording"))
+            video_path = test_results_dir / "video.webm"
+            if video_path.exists():
+                extra.append(pytest_html.extras.url(f"{rel_dir}/video.webm", name="🔴 Video Recording"))
 
-    report.extra = extra
+            # rep_call, stashed by pytest-playwright, holds the test's real pass/fail outcome.
+            test_failed = getattr(item, "rep_call", None) is not None and item.rep_call.failed
+            trace_path = test_results_dir / "trace.zip"
+            if test_failed and trace_path.exists():
+                try:
+                    extra.append(pytest_html.extras.html(build_trace_summary_html(trace_path)))
+                except Exception as e:
+                    print(f"Error parsing trace.zip for report: {e}")
+
+    report.extras = extra
