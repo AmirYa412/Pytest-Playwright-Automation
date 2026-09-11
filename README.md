@@ -249,7 +249,7 @@ Shared test execution logic used by both workflows:
 
 Reports include:
 - ✅ Test execution summary
-- ✅ Screenshots (embedded as base64)
+- ✅ Screenshots (saved as PNG, linked for failed tests)
 - ✅ Video recordings (linked for failed tests)
 - ✅ Execution logs and metadata
 
@@ -262,9 +262,9 @@ Reports include:
 Test reports are automatically generated using `pytest-html` with the following features:
 
 **Screenshots:**
-- Embedded as base64 images
 - Captured automatically on test failure
-- No external file dependencies
+- Saved to `reports/test-results/{test-name}/screenshot.png`
+- Linked in HTML report for easy access
 
 **Videos:**
 - Recorded only for failed tests (`--video=retain-on-failure`)
@@ -272,13 +272,20 @@ Test reports are automatically generated using `pytest-html` with the following 
 - Linked in HTML report for easy access
 - Clickable "🔴 Video Recording" link in test results
 
+**Traces:**
+- Captured by default via `--tracing=retain-on-failure` in `pytest.ini` (a plain pytest-playwright flag), same as video — only for tests that actually failed
+- A failed test with a trace gets an expandable "🔍 Trace Summary" in the report: the failed Playwright action (if any) and its error, a compact action timeline, any console errors, and any failed (4xx/5xx) network requests
+- The raw `trace.zip` is still saved to `reports/test-results/{test-name}/trace.zip` (not linked from the report) for a full timeline/DOM-snapshot/network deep-dive — open it with `playwright show-trace path/to/trace.zip`, or drag it into https://trace.playwright.dev (processes the file locally in your browser; it's not uploaded anywhere, worth knowing since traces can contain cookies/tokens from captured requests)
+
 **Report Location:**
 ```
 reports/
 ├── report.html              # Main HTML report
-└── test-results/            # Video recordings
+└── test-results/            # Screenshot/video/trace artifacts
     └── {test-name}/
-        └── video.webm
+        ├── screenshot.png
+        ├── video.webm
+        └── trace.zip
 ```
 
 ### Viewing Reports Locally
