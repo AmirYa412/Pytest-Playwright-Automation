@@ -132,12 +132,13 @@ def pytest_runtest_makereport(item):
             test_results_dir = Path(output_path)
             rel_dir = os.path.relpath(test_results_dir, report_dir)
 
-            video_path = test_results_dir / "video.webm"
-            if video_path.exists():
-                extra.append(pytest_html.extras.url(f"{rel_dir}/video.webm", name="🔴 Video Recording"))
-
             # rep_call, stashed by pytest-playwright, holds the test's real pass/fail outcome.
             test_failed = getattr(item, "rep_call", None) is not None and item.rep_call.failed
+
+            video_path = test_results_dir / "video.webm"
+            if test_failed and video_path.exists():
+                extra.append(pytest_html.extras.url(f"{rel_dir}/video.webm", name="🔴 Video Recording"))
+
             trace_path = test_results_dir / "trace.zip"
             if test_failed and trace_path.exists():
                 try:
