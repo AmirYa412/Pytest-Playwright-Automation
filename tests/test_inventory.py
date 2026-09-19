@@ -21,13 +21,11 @@ class TestInventoryPage:
 
         inventory = pages.inventory
         for product_name in expected_products:
-            product_card = inventory.get_product_card(product_name)
-
-            expect(product_card.locator(inventory.item_name)).to_have_text(product_name)
-            expect(product_card.locator(inventory.item_img)).to_be_visible()
-            expect(product_card.locator(inventory.item_desc)).not_to_be_empty()
-            expect(product_card.locator(inventory.item_price)).to_contain_text("$")
-            expect(product_card.locator(inventory.add_to_cart_btn)).to_be_enabled()
+            expect(inventory.get_product_title(product_name)).to_have_text(product_name)
+            expect(inventory.get_product_image(product_name)).to_be_visible()
+            expect(inventory.get_product_description(product_name)).not_to_be_empty()
+            expect(inventory.get_product_price(product_name)).to_contain_text("$")
+            expect(inventory.get_product_add_to_cart_button(product_name)).to_be_enabled()
 
 
     def test_add_and_remove_item_updates_cart_badge(self, pages, data):
@@ -38,11 +36,10 @@ class TestInventoryPage:
         expect(header.shopping_cart_badge).not_to_be_visible()
 
         product_name = data["inventory"]["item_1"]
-        product_card = inventory.get_product_card(product_name)
-        product_card.locator(inventory.add_to_cart_btn).click()
+        inventory.add_item_to_cart(product_name)
 
         expect(header.shopping_cart_badge).to_be_visible()
         expect(header.shopping_cart_badge).to_have_text("1")
 
-        product_card.locator(inventory.remove_btn).click()
+        inventory.remove_item_from_cart(product_name)
         expect(header.shopping_cart_badge).not_to_be_visible()
